@@ -72,7 +72,7 @@ public class AVLNode {
      * @return
      */
     public boolean isLeftChild() {
-        return parent != null && this.parent == left;
+        return parent != null && this == parent.left;
     }
 
     /**
@@ -80,7 +80,7 @@ public class AVLNode {
      * @return
      */
     public boolean isRightChild() {
-        return parent != null && this.parent == right;
+        return parent != null && this == parent.right;
     }
 
 

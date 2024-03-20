@@ -1,5 +1,8 @@
 package BinarySearchTree_AVL;
 
+import java.util.*;
+
+
 /**
  * ClassName: BinarySearchTree_AVL.AVLTree
  * Description:
@@ -14,6 +17,16 @@ public class AVLTree {
 
     private int size;
 
+    private final boolean flagAutoPrint;
+
+    private printAVL printAVL = null;
+
+
+    public AVLTree(boolean flagAutoPrint) {
+        this.flagAutoPrint = flagAutoPrint;
+        this.printAVL = new printAVL();
+    }
+
     public void add(int element) {
 
         if (root == null) {
@@ -21,7 +34,7 @@ public class AVLTree {
             size++;
 
             afterAdd(root);
-
+            if (flagAutoPrint) printAVL.print(root);
             return;
         }
 
@@ -44,6 +57,7 @@ public class AVLTree {
         else insertNodeParent.right = newCreateAVLNode;
 
         afterAdd(newCreateAVLNode);
+        if (flagAutoPrint) printAVL.print(root);
     }
 
     /**
@@ -51,11 +65,14 @@ public class AVLTree {
      * @param node
      */
     private void afterAdd(AVLNode node) {
+        while ((node = node.parent) != null) {
+            if (isBalanced(node)) { // 平衡，更新高度
+                updateHeight(node);
+            } else { // 恢复平衡
+                rebalance(node);
+                break;
+            }
 
-        if (isBalanced(node)) { // 平衡，更新高度
-            updateHeight(node);
-        } else { // 恢复平衡
-            rebalance(node);
         }
     }
 
@@ -157,7 +174,7 @@ public class AVLTree {
     }
 
     private boolean isBalanced(AVLNode node) {
-        return Math.abs(node.left.height - node.right.height) <= 1;
+        return Math.abs(node.balanceFactor()) <= 1;
     }
 
 }
