@@ -60,6 +60,72 @@ public class AVLTree {
         if (flagAutoPrint) printAVL.print(root);
     }
 
+    public void remove(int element) {
+        remove(node(element));
+    }
+
+    private void remove(AVLNode node) {
+
+        if (node == null) return;
+
+        size--;
+
+        // 度为2度节点
+        if (node.NodeDegreeTwo()) {
+            AVLNode s = successor(node); // 找到后继节点
+            node.element = s.element;
+            node = s;
+        }
+
+        AVLNode replacement = node.left != null ? node.left : node.right;
+
+        if (replacement != null) { // 度为1的节点
+            replacement.parent = node.parent;
+            // 改变parent的left、right的指向
+            if (node.parent == null) root = replacement;
+            else if (node == node.parent.left) node.parent.left = replacement;
+            else node.parent.right = replacement;
+
+            // 删除节点后AVL操作
+            afterRemove(node);
+        } else if (node.parent == null) { // node是叶子节点且是root
+            root = null;
+
+            // 删除节点后AVL操作
+            afterRemove(node);
+        } else { // node是叶子节点且不是root
+            if (node == node.parent.left) node.parent.left = null;
+            else node.parent.right = null;
+
+            // 删除节点后AVL操作
+            afterRemove(node);
+        }
+
+    }
+
+
+    private AVLNode successor(AVLNode node) {
+
+        AVLNode p = node.right;
+
+        // 存在右子树的情况
+        if (p != null) { // node.right.left.left...
+            while (p.left != null) {
+                p = p.left;
+            }
+            return p;
+        }
+
+        // 不存在右子树的情况向上寻找
+        while (node.parent != null && node != node.parent.left) {
+            node = node.parent;
+        }
+
+        // 当node == node.parent.left这时候node.parent就是答案节点
+        // 当node.parent == null无后继直接返回node.parent也是可以
+        return node.parent;
+    }
+
     /**
      * 添加后进行平衡操作
      * @param node
@@ -73,6 +139,21 @@ public class AVLTree {
                 break;
             }
 
+        }
+    }
+
+    /**
+     * 删除节点后进行的平衡操作
+     * 因为二叉树实现删除的逻辑一定是删除度为1或者是叶子节点
+     * @param node
+     */
+    private void afterRemove(AVLNode node) {
+        while ((node = node.parent) != null) {
+            if (isBalanced(node)) {
+                updateHeight(node);
+            } else {
+                rebalance(node);
+            }
         }
     }
 
@@ -177,4 +258,16 @@ public class AVLTree {
         return Math.abs(node.balanceFactor()) <= 1;
     }
 
+    private AVLNode node(int element) {
+        AVLNode node = root;
+
+        while (node != null) {
+            int cmp = cmp(element, node.element);
+            if (cmp == 0) return node;
+            else if (cmp > 0) node = node.right;
+            else node = node.left;
+        }
+
+        return null;
+    }
 }
